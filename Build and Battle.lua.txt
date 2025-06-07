@@ -570,147 +570,161 @@ local orbitRadius = 15  -- Default orbit radius
 end
 
 local function createControlButton()
-    if LocalPlayer:FindFirstChild("PlayerGui"):FindFirstChild("BlackHoleControlGUI") then
-        return
-    end
-
-    local screenGui = Instance.new("ScreenGui")
-    screenGui.Name = "BlackHoleControlGUI"
-    screenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
-
-    local mainFrame = Instance.new("Frame")
-    mainFrame.Size = UDim2.new(0, 220, 0, 280)
-    mainFrame.Position = UDim2.new(0.5, -110, 0, 100)
-    mainFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    mainFrame.BackgroundTransparency = 0.3
-    mainFrame.Parent = screenGui
-
-    -- UIListLayout to manage children layout vertically with spacing
-    local layout = Instance.new("UIListLayout")
-    layout.Parent = mainFrame
-    layout.SortOrder = Enum.SortOrder.LayoutOrder
-    layout.Padding = UDim.new(0, 10)
-
-    local function styleButton(button)
-        button.Size = UDim2.new(1, 0, 0, 50)  -- Full width of mainFrame
-        button.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-        button.BackgroundTransparency = 0.3
-        button.TextColor3 = Color3.fromRGB(255, 255, 255)
-        button.TextScaled = true
-        button.AutoButtonColor = true
-
-        local uiCorner = Instance.new("UICorner", button)
-        uiCorner.CornerRadius = UDim.new(0, 10)
-
-        local borderStroke = Instance.new("UIStroke", button)
-        borderStroke.Thickness = 3
-        borderStroke.Color = Color3.fromRGB(0, 0, 0)
-    end
-
-    local function styleTextBox(textbox)
-        textbox.Size = UDim2.new(1, 0, 0, 50)  -- Full width of mainFrame
-        textbox.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-        textbox.BackgroundTransparency = 0.3
-        textbox.TextColor3 = Color3.fromRGB(255, 255, 255)
-        textbox.TextScaled = true
-        textbox.ClearTextOnFocus = false
-
-        local uiCorner = Instance.new("UICorner", textbox)
-        uiCorner.CornerRadius = UDim.new(0, 10)
-
-        local borderStroke = Instance.new("UIStroke", textbox)
-        borderStroke.Thickness = 3
-        borderStroke.Color = Color3.fromRGB(0, 0, 0)
-    end
-
-    toggleBlackholeButton = Instance.new("TextButton")
-    toggleBlackholeButton.Name = "ToggleBlackHoleButton"
-    toggleBlackholeButton.Text = "Deactivate Black Hole"
-    toggleBlackholeButton.Parent = mainFrame
-    toggleBlackholeButton.Draggable = true
-    toggleBlackholeButton.Active = true
-    styleButton(toggleBlackholeButton)
-
-    orbitBlackholeButton = Instance.new("TextButton")
-    orbitBlackholeButton.Name = "OrbitBlackHoleButton"
-    orbitBlackholeButton.Text = "Activate Orbit Black Hole"
-    orbitBlackholeButton.Parent = mainFrame
-    orbitBlackholeButton.Draggable = true
-    orbitBlackholeButton.Active = true
-    styleButton(orbitBlackholeButton)
-
-    orbitSpeedTextBox = Instance.new("TextBox")
-    orbitSpeedTextBox.Name = "OrbitSpeedTextBox"
-    orbitSpeedTextBox.Text = tostring(orbitSpeed)
-    orbitSpeedTextBox.PlaceholderText = "Orbit Speed"
-    orbitSpeedTextBox.Parent = mainFrame
-    styleTextBox(orbitSpeedTextBox)
-
-    orbitRadiusTextBox = Instance.new("TextBox")
-    orbitRadiusTextBox.Name = "OrbitRadiusTextBox"
-    orbitRadiusTextBox.Text = tostring(orbitRadius)
-    orbitRadiusTextBox.PlaceholderText = "Orbit Radius"
-    orbitRadiusTextBox.Parent = mainFrame
-    styleTextBox(orbitRadiusTextBox)
-
-    -- Event connections same as before
-    toggleBlackholeButton.MouseButton1Click:Connect(function()
-        toggleBlackHole()
-        if blackHoleActive then
-            toggleBlackholeButton.Text = "Deactivate Black Hole"
-        else
-            toggleBlackholeButton.Text = "Activate Black Hole"
-        end
-    end)
-
-    orbitBlackholeButton.MouseButton1Click:Connect(function()
-        toggleOrbitBlackhole()
-        if orbitBlackholeActive then
-            orbitBlackholeButton.Text = "Deactivate Orbit Black Hole"
-        else
-            orbitBlackholeButton.Text = "Activate Orbit Black Hole"
-        end
-    end)
-
-    orbitSpeedTextBox.FocusLost:Connect(function(enterPressed)
-        if enterPressed then
-            local newSpeed = tonumber(orbitSpeedTextBox.Text)
-            if newSpeed then
-                orbitSpeed = newSpeed
-            else
-                orbitSpeedTextBox.Text = tostring(orbitSpeed)
-            end
-        end
-    end)
-
-    orbitRadiusTextBox.FocusLost:Connect(function(enterPressed)
-        if enterPressed then
-            local newRadius = tonumber(orbitRadiusTextBox.Text)
-            if newRadius then
-                orbitRadius = newRadius
-            else
-                orbitRadiusTextBox.Text = tostring(orbitRadius)
-            end
-        end
-    end)
-
--- Remaining code to handle respawn and initial GUI creation stays the same
-
-    -- Ensure the GUI persists after death by recreating it when the player respawns
-    local function onPlayerRespawn()
-        createControlButton()  -- Recreate the GUI when the player respawns
-    end
-
-    -- Connect the respawn event
-    LocalPlayer.CharacterAdded:Connect(function(newCharacter)
-        humanoidRootPart = newCharacter:WaitForChild("HumanoidRootPart")
-        onPlayerRespawn()
-    end)
-
-    -- Initial GUI creation
-    createControlButton()
-    toggleBlackHole()  -- Initially start the black hole
+-- Check if the GUI already exists to prevent duplication
+if LocalPlayer:FindFirstChild("PlayerGui"):FindFirstChild("BlackHoleControlGUI") then
+return
 end
+
+local screenGui = Instance.new("ScreenGui")  
+toggleBlackholeButton = Instance.new("TextButton")  
+orbitBlackholeButton = Instance.new("TextButton")  
+orbitSpeedTextBox = Instance.new("TextBox")  
+orbitRadiusTextBox = Instance.new("TextBox")  
+
+-- General button styling  
+local function styleButton(button)  
+    button.Size = UDim2.new(0, 200, 0, 50)  
+    button.BackgroundColor3 = Color3.fromRGB(0, 0, 0)  -- Black background  
+    button.BackgroundTransparency = 0.3  -- Slight transparency  
+    button.TextColor3 = Color3.fromRGB(255, 255, 255)  -- White text  
+    button.TextScaled = true  -- Auto scale text  
+
+    -- Add UICorner for rounded edges  
+    local uiCorner = Instance.new("UICorner")  
+    uiCorner.CornerRadius = UDim.new(0, 10)  
+    uiCorner.Parent = button  
+
+    -- Add UIStroke for the border and set to black  
+    local borderStroke = Instance.new("UIStroke")  
+    borderStroke.Parent = button  
+    borderStroke.Thickness = 3  
+    borderStroke.Color = Color3.fromRGB(0, 0, 0)  -- Black border  
+end  
+
+-- General textbox styling  
+local function styleTextBox(textbox)  
+    textbox.Size = UDim2.new(0, 100, 0, 50)  -- Adjust the size for 50px height  
+    textbox.BackgroundColor3 = Color3.fromRGB(0, 0, 0)  -- Black background  
+    textbox.BackgroundTransparency = 0.3  -- Slight transparency  
+    textbox.TextColor3 = Color3.fromRGB(255, 255, 255)  -- White text  
+    textbox.TextScaled = true  -- Auto scale text  
+    textbox.ClearTextOnFocus = false  -- Keep the text after clicking  
+
+    -- Add UICorner for rounded edges  
+    local uiCorner = Instance.new("UICorner")  
+    uiCorner.CornerRadius = UDim.new(0, 10)  
+    uiCorner.Parent = textbox  
+
+    -- Add UIStroke for the border and set to black  
+    local borderStroke = Instance.new("UIStroke")  
+    borderStroke.Parent = textbox  
+    borderStroke.Thickness = 3  
+    borderStroke.Color = Color3.fromRGB(0, 0, 0)  -- Black border  
+end  
+
+screenGui.Name = "BlackHoleControlGUI"  
+screenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")  
+
+-- Toggle Black Hole Button  
+toggleBlackholeButton.Name = "ToggleBlackHoleButton"  
+toggleBlackholeButton.Position = UDim2.new(0.5, -100, 0, 100)  
+toggleBlackholeButton.Text = "Deactivate Black Hole"  
+toggleBlackholeButton.Parent = screenGui  
+toggleBlackholeButton.Draggable = true  -- Make the button draggable  
+toggleBlackholeButton.Active = true  -- Required for draggable GUIs  
+
+-- Style the toggle black hole button  
+styleButton(toggleBlackholeButton)  
+
+-- Orbit Black Hole Button  
+orbitBlackholeButton.Name = "OrbitBlackHoleButton"  
+orbitBlackholeButton.Position = UDim2.new(0.5, -100, 0, 160)  -- Place below the first button  
+orbitBlackholeButton.Text = "Activate Orbit Black Hole"  
+orbitBlackholeButton.Parent = screenGui  
+orbitBlackholeButton.Draggable = true  
+orbitBlackholeButton.Active = true  
+
+-- Style the orbit black hole button  
+styleButton(orbitBlackholeButton)  
+
+-- Orbit Speed TextBox  
+orbitSpeedTextBox.Name = "OrbitSpeedTextBox"  
+orbitSpeedTextBox.Position = UDim2.new(0.5, -120, 0, 220)  -- Position near the other buttons  
+orbitSpeedTextBox.Text = tostring(orbitSpeed)  -- Set initial text to the default speed  
+orbitSpeedTextBox.Parent = screenGui  
+styleTextBox(orbitSpeedTextBox)  
+
+-- Orbit Radius TextBox  
+orbitRadiusTextBox.Name = "OrbitRadiusTextBox"  
+orbitRadiusTextBox.Position = UDim2.new(0.5, 0, 0, 220)  -- Position next to the speed textbox  
+orbitRadiusTextBox.Text = tostring(orbitRadius)  -- Set initial text to the default radius  
+orbitRadiusTextBox.Parent = screenGui  
+styleTextBox(orbitRadiusTextBox)  
+
+-- Toggle black hole state on click  
+toggleBlackholeButton.MouseButton1Click:Connect(function()  
+    toggleBlackHole()  
+    if blackHoleActive then  
+        toggleBlackholeButton.Text = "Deactivate Black Hole"  
+    else  
+        toggleBlackholeButton.Text = "Activate Black Hole"  
+    end  
+end)  
+
+-- Toggle orbit black hole state on click  
+orbitBlackholeButton.MouseButton1Click:Connect(function()  
+    toggleOrbitBlackhole()  
+    if orbitBlackholeActive then  
+        orbitBlackholeButton.Text = "Deactivate Orbit Black Hole"  
+    else  
+        orbitBlackholeButton.Text = "Activate Orbit Black Hole"  
+    end  
+end)  
+
+-- Update orbit speed when the user inputs a value  
+orbitSpeedTextBox.FocusLost:Connect(function(enterPressed)  
+    if enterPressed then  
+        local newSpeed = tonumber(orbitSpeedTextBox.Text)  
+        if newSpeed then  
+            orbitSpeed = newSpeed  -- Update orbit speed  
+        else  
+            orbitSpeedTextBox.Text = tostring(orbitSpeed)  -- Reset to previous value if input is invalid  
+        end  
+    end  
+end)  
+
+-- Update orbit radius when the user inputs a value  
+orbitRadiusTextBox.FocusLost:Connect(function(enterPressed)  
+    if enterPressed then  
+        local newRadius = tonumber(orbitRadiusTextBox.Text)  
+        if newRadius then  
+            orbitRadius = newRadius  -- Update orbit radius  
+        else  
+            orbitRadiusTextBox.Text = tostring(orbitRadius)  -- Reset to previous value if input is invalid  
+        end  
+    end  
+end)
+
+end
+
+-- Ensure the GUI persists after death by recreating it when the player respawns  
+local function onPlayerRespawn()  
+    createControlButton()  -- Recreate the GUI when the player respawns  
+end  
+
+-- Connect the respawn event  
+LocalPlayer.CharacterAdded:Connect(function(newCharacter)  
+    humanoidRootPart = newCharacter:WaitForChild("HumanoidRootPart")  
+    onPlayerRespawn()  
+end)  
+
+-- Initial GUI creation  
+createControlButton()  
+toggleBlackHole()  -- Initially start the black hole
+
+end
+
+
 
 
 local function processCommand(player, msg)
